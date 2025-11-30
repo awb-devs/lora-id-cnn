@@ -1,0 +1,25 @@
+[project]
+name = "lora-id-cnn"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "AWB",email = "220265642+awb-devs@users.noreply.github.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "numpy (>=2.3.5,<3.0.0)",
+    "matplotlib (>=3.10.7,<4.0.0)",
+    "torch (>=2.9.1,<3.0.0)",
+    "torchvision (>=0.24.1,<0.25.0)",
+    "tqdm (>=4.67.1,<5.0.0)",
+    "tensorboard (>=2.20.0,<3.0.0)",
+    "scikit-learn (>=1.7.2,<2.0.0)",
+    "seaborn (>=0.13.2,<0.14.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
