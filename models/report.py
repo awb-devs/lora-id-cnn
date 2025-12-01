@@ -64,11 +64,11 @@ Epochs = {epochs} \\
 """
 
     def save(self):
-        with open(f"{self.name}/{self.name}_report.typ", "w") as f:
+        with open(f"results/{self.name}/{self.name}_report.typ", "w") as f:
             f.write(self.report)
 
     def compile(self, typst_path="/opt/homebrew/bin/typst"):
-        subprocess.run([typst_path, "compile", f"{self.name}/{self.name}_report.typ"])
+        subprocess.run([typst_path, "compile", f"results/{self.name}/{self.name}_report.typ"])
 
     def add_accuracy(self, accuracy, alt_name=None):        
         if alt_name: name = alt_name
@@ -84,7 +84,7 @@ Epochs = {epochs} \\
         plt.ylabel("Average Loss", fontsize=12)
         plt.title(f"{name} - Average Loss Per Epoch")
         flname = f"{name}_loss.png"
-        plt.savefig(f"{self.name}/{flname}")
+        plt.savefig(f"results/{self.name}/{flname}")
         plt.close()
         self.report += f'#figure(image("{flname}", width:90%),caption:[Loss Graph for {name} experiment])'
 
@@ -99,7 +99,7 @@ Epochs = {epochs} \\
         plt.title(f"{name} - Average Loss Per Epoch")
         plt.legend()
         flname = f"{name}_mloss.png"
-        plt.savefig(f"{self.name}/{flname}")
+        plt.savefig(f"results/{self.name}/{flname}")
         plt.close()
         self.report += f'#figure(image("{flname}", width:90%), caption: [Loss Comparison for {name} experiment])'
 
@@ -113,7 +113,7 @@ Epochs = {epochs} \\
         plt.ylabel('True Class')
         plt.title(f'Classification Accuracy = {results['accuracy']}')
         flname = f"{name}_confusion.png"
-        plt.savefig(f"{self.name}/{flname}")
+        plt.savefig(f"results/{self.name}/{flname}")
         plt.close()
         self.report += f'#figure(image("{flname}", width:90%),caption: [Confusion Matrix for {name} experiment])'
 
@@ -131,6 +131,6 @@ Epochs = {epochs} \\
         plt.title(f"{name} Accuracy")
         plt.ylim(0, 1)  
         flname = f"{name}_accuracy"
-        plt.savefig(f"{self.name}/{flname}.png")
+        plt.savefig(f"results/{self.name}/{flname}.png")
         plt.close()
         self.report += f'#figure(image("{flname}.png", width:90%), caption: [Accuracy Graph for {name}])'

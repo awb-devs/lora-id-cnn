@@ -13,14 +13,13 @@ from data import IQDataset
 """
 Helper function which abstracts the testing loop.
 Parameters:
-    name: the experiment name
     network: the pytorch network
     dataloader: the pytorch dataloader
 Returns:
     prints the accuracy
     returns the accuracy and also y_true and y_pred arrays for a confusion matrix
 """
-def test(name, network, dataloader):
+def test(network, dataloader):
     # Network Testing
     correct = 0
     total = 0

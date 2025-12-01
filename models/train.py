@@ -33,5 +33,5 @@ def train(name, network, optimizer, dataloader, epochs):
             running_loss += loss.item()
         training_loss.append(running_loss)
 
-    torch.save(network.state_dict(), f"{name}/{name}.pth")
+    torch.save(network.state_dict(), f"results/{name}/{name}.pth")
     return training_loss

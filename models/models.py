@@ -14,7 +14,7 @@ class Multi_Net(nn.Module):
         self.con1 = nn.Conv2d(10, 10, (5, 2))
         self.lin0 = nn.Linear(10*(input_len-6), 256)
         self.lin1 = nn.Linear(256, 80)
-        self.outp = nn.Linear(80, 8)
+        self.outp = nn.Linear(80, 6)
 
     def forward(self, x, train=False):
         # Conv Layer 0

@@ -110,7 +110,7 @@ class IQDataset(Dataset):
             offset = random.randrange(buf.shape[1] - self.window)
             buf = buf[:, offset:offset+self.window]
         if self.normalized:
-            buf / np.linalg.norm(buf) 
+            buf = buf / np.linalg.norm(buf) 
         if self.noise is not None:
             signal_power = np.mean(buf**2)
             snr_linear = 10**(self.noise / 10)
