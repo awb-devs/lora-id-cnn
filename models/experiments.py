@@ -40,9 +40,14 @@ decimation:
 
 wired_main:
     Experiment which trains a single model with settings meant to replicate the study.
-    Runs with decimation = 2, window = 400, and normalization on the wired dataset.
+    Runs with decimation = 2, window = 400 on the wired dataset.
     note: there is a small chance that the model will get stuck on local minimum and 
         never escape the 'always choose a single class' strategy. 
+
+wired_normalized:
+    Identical to wired_main but with normalization.
+    note: normalization appears to increase the chances
+        of the 'always choose a single class' strategy local optima.
 
 wired_fullwidth:
     Experiment which trains the wired dataset on all 1024 samples with no preprocessing.
@@ -60,14 +65,20 @@ room_fullwidth:
     Experiment which trains the wireless 'room' dataset on all 1024 samples with no preprocessing.
 
 room_normalized:
-    Experiment which trains the wireless 'room' dataset on all 1024 samples with only normalization.
+    Identical to room_main but with normalization.    
+    note: normalization appears to increase the chances
+        of the 'always choose a single class' strategy local optima.
 """
 experiments = {
         'create_labelsets': False,
         'typst': True,
         'noise': False,
         'decimation': False,
+        'decimation_contrast': False,
+        'decimation_reversed': False,
+        'windowing_contrast': False,
         'wired_main': False,
+        'wired_normalized': False,
         'wired_fullwidth': False,
         'windowed_random': False,
         'room_main': False,
@@ -117,6 +128,118 @@ if experiments['noise']:
 
     rpt.add_loss_figure(loss) 
     rpt.add_accuracy_graph(accuracy, "SNR (dB)", x_labels=accuracy_labels)
+    rpt.save()
+    if typst: rpt.compile()
+
+if experiments['decimation_reversed']:
+    name = 'decimation_reversed'
+    dataset = 'wired_250_24'
+    batch_size = 200
+    lr = 0.001
+    epochs = 20
+
+    Path(f"results/{name}").mkdir(exist_ok=True)
+    stored_labels = np.load('dataset/labels.npz', allow_pickle=True)
+    tr_labels = stored_labels['wired_tr']
+    ts_labels = stored_labels['wired_ts']
+
+    rpt = report(name, dataset, lr, epochs)
+    accuracy = []
+    accuracy_labels = []
+    for d in [128, 64, 16, 2]:
+        mloss_trial = {}
+        trial_accuracy = 0;
+        for i in range(50):
+            tr_data = IQDataset(tr_labels, decimation=d, normalized=True)
+            ts_data = IQDataset(ts_labels, decimation=d, normalized=True)
+            tr_loader = DataLoader(tr_data, batch_size, shuffle=True)
+            ts_loader = DataLoader(ts_data, batch_size, shuffle=True)
+            network = models.Multi_Net(input_len=math.ceil(1024/d))
+            opt = optim.Adam(network.parameters(), lr)
+            loss = train(name, network, opt, tr_loader, epochs)
+            results = test(network, ts_loader)
+            mloss_trial[f"t = {i}"] = loss
+            trial_accuracy += results['accuracy']
+        accuracy.append(trial_accuracy / 50)
+        accuracy_labels.append(f"{d}")
+        rpt.add_multi_loss(mloss_trial, alt_name=f"decimation_{d}")
+
+    rpt.add_accuracy_graph(accuracy, "decimation", x_labels=accuracy_labels)
+    rpt.save()
+    if typst: rpt.compile()
+
+if experiments['decimation_contrast']:
+    name = 'decimation_contrast'
+    dataset = 'wired_250_24'
+    batch_size = 200
+    lr = 0.001
+    epochs = 20
+
+    Path(f"results/{name}").mkdir(exist_ok=True)
+    stored_labels = np.load('dataset/labels.npz', allow_pickle=True)
+    tr_labels = stored_labels['wired_tr']
+    ts_labels = stored_labels['wired_ts']
+
+    rpt = report(name, dataset, lr, epochs)
+    accuracy = []
+    accuracy_labels = []
+    for d in [2, 16, 64, 128]:
+        mloss_trial = {}
+        trial_accuracy = 0;
+        for i in range(50):
+            tr_data = IQDataset(tr_labels, decimation=d, normalized=True)
+            ts_data = IQDataset(ts_labels, decimation=d, normalized=True)
+            tr_loader = DataLoader(tr_data, batch_size, shuffle=True)
+            ts_loader = DataLoader(ts_data, batch_size, shuffle=True)
+            network = models.Multi_Net(input_len=math.ceil(1024/d))
+            opt = optim.Adam(network.parameters(), lr)
+            loss = train(name, network, opt, tr_loader, epochs)
+            results = test(network, ts_loader)
+            mloss_trial[f"t = {i}"] = loss
+            trial_accuracy += results['accuracy']
+        accuracy.append(trial_accuracy / 50)
+        accuracy_labels.append(f"{d}")
+        rpt.add_multi_loss(mloss_trial, alt_name=f"decimation_{d}")
+
+    rpt.add_accuracy_graph(accuracy, "decimation", x_labels=accuracy_labels)
+    rpt.save()
+    if typst: rpt.compile()
+
+if experiments['windowing_contrast']:
+    name = 'windowing_contrast'
+    dataset = 'wired_250_24'
+    batch_size = 200
+    lr = 0.001
+    epochs = 20
+
+    Path(f"results/{name}").mkdir(exist_ok=True)
+    stored_labels = np.load('dataset/labels.npz', allow_pickle=True)
+    tr_labels = stored_labels['wired_tr']
+    ts_labels = stored_labels['wired_ts']
+
+    rpt = report(name, dataset, lr, epochs)
+    accuracy = []
+    accuracy_labels = []
+    for d in [2, 16, 64, 128]:
+        mloss_trial = {}
+        trial_accuracy = 0;
+        for i in range(50):
+            samples = math.ceil(1024/d)
+            tr_data = IQDataset(tr_labels, window=samples, normalized=True)
+            ts_data = IQDataset(ts_labels, window=samples, normalized=True)
+            tr_loader = DataLoader(tr_data, batch_size, shuffle=True)
+            ts_loader = DataLoader(ts_data, batch_size, shuffle=True)
+            network = models.Multi_Net(input_len=samples)
+            opt = optim.Adam(network.parameters(), lr)
+            loss = train(name, network, opt, tr_loader, epochs)
+            results = test(network, ts_loader)
+            mloss_trial[f"t = {i}"] = loss
+            trial_accuracy += results['accuracy']
+        accuracy.append(trial_accuracy / 50)
+        accuracy_labels.append(f"{d}")
+        rpt.add_multi_loss(mloss_trial, alt_name=f"window_{d}")
+
+    rpt.add_accuracy_graph(accuracy, "windowing", x_labels=accuracy_labels)
     rpt.save()
     if typst: rpt.compile()
 
@@ -170,6 +293,38 @@ if experiments['wired_main']:
     
     tr_data = IQDataset(tr_labels, decimation=2, window=400)
     ts_data = IQDataset(ts_labels, decimation=2, window=400)
+
+    tr_loader = DataLoader(tr_data, batch_size, shuffle=True)
+    ts_loader = DataLoader(ts_data, batch_size, shuffle=True)
+    
+    network = models.Multi_Net(input_len=400)
+    opt = optim.Adam(network.parameters(), lr)
+
+    Path(f"results/{name}").mkdir(exist_ok=True)
+
+    loss = train(name, network, opt, tr_loader, epochs)
+    results = test(network, ts_loader)
+    
+    rpt = report(name, dataset, lr, epochs)
+    rpt.add_accuracy(results['accuracy'])
+    rpt.add_loss_figure(loss)
+    rpt.add_confusion(results, ts_data.classes)
+    rpt.save()
+    if typst: rpt.compile()
+
+if experiments['wired_normalized']:
+    name = 'wired_normalized'
+    dataset = 'wired_250_24'
+    batch_size = 200
+    lr = 0.001
+    epochs = 50
+
+    stored_labels = np.load('dataset/labels.npz', allow_pickle=True)
+    tr_labels = stored_labels['wired_tr']
+    ts_labels = stored_labels['wired_ts']
+    
+    tr_data = IQDataset(tr_labels, decimation=2, normalized=True, window=400)
+    ts_data = IQDataset(ts_labels, decimation=2, normalized=True, window=400)
 
     tr_loader = DataLoader(tr_data, batch_size, shuffle=True)
     ts_loader = DataLoader(ts_data, batch_size, shuffle=True)
@@ -328,20 +483,20 @@ if experiments['room_normalized']:
     tr_labels = stored_labels['room_tr']
     ts_labels = stored_labels['room_ts']
     
-    tr_data = IQDataset(tr_labels, normalized=True)
-    ts_data = IQDataset(ts_labels, normalized=True)
+    tr_data = IQDataset(tr_labels, decimation=2, normalized=True, window=400)
+    ts_data = IQDataset(ts_labels, decimation=2, normalized=True, window=400)
 
     tr_loader = DataLoader(tr_data, batch_size, shuffle=True)
     ts_loader = DataLoader(ts_data, batch_size, shuffle=True)
-
-    network = models.Multi_Net()
+    
+    network = models.Multi_Net(input_len=400)
     opt = optim.Adam(network.parameters(), lr)
 
     Path(f"results/{name}").mkdir(exist_ok=True)
 
     loss = train(name, network, opt, tr_loader, epochs)
     results = test(network, ts_loader)
-  
+    
     rpt = report(name, dataset, lr, epochs)
     rpt.add_accuracy(results['accuracy'])
     rpt.add_loss_figure(loss)

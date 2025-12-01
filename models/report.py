@@ -129,7 +129,7 @@ Epochs = {epochs} \\
         plt.xlabel(x_label, fontsize=12)
         plt.ylabel("Accuracy", fontsize=12)
         plt.title(f"{name} Accuracy")
-        plt.ylim(0, 1)  
+        plt.grid(True)
         flname = f"{name}_accuracy"
         plt.savefig(f"results/{self.name}/{flname}.png")
         plt.close()
