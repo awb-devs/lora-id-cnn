@@ -4,6 +4,18 @@ import torchvision
 from tqdm import tqdm
 import torch.nn as nn
 
+"""
+Helper function which abstracts the training loop.
+Parameters:
+    name: the experiment name
+    network: the pytorch network
+    optimizer: the optimizer to use in training
+    dataloader: the pytorch dataloader
+    epochs: the number of epochs to perform
+Returns:
+    saves the model to a pth file
+    returns the training loss array for plotting
+"""
 def train(name, network, optimizer, dataloader, epochs):
     criterion = nn.CrossEntropyLoss()
     training_loss = []
