@@ -71,7 +71,7 @@ room_normalized:
 """
 experiments = {
         'create_labelsets': False,
-        'typst': True,
+        'typst': False,
         'noise': False,
         'decimation': False,
         'decimation_contrast': False,
@@ -277,6 +277,46 @@ if experiments['decimation']:
         rpt.add_multi_loss(mloss_trial, alt_name=f"decimation_{d}")
 
     rpt.add_accuracy_graph(accuracy, "decimation", x_labels=accuracy_labels)
+    rpt.save()
+    if typst: rpt.compile()
+
+if experiments['normalization']:
+    name = 'normalization'
+    dataset = 'room_250_16'
+    batch_size = 200
+    lr = 0.001
+    epochs = 50
+
+    Path(f"results/{name}").mkdir(exist_ok=True)
+    stored_labels = np.load('dataset/labels.npz', allow_pickle=True)
+    tr_labels = stored_labels['wired_tr']
+    ts_labels = stored_labels['wired_ts']
+
+    rpt = report(name, dataset, lr, epochs)
+    accuracy = []
+    accuracy_labels = []
+    for n in [True, False]:
+        default_strat = 0;
+        mloss_trial = {}
+        trial_accuracy = 0;
+        for i in range(30):
+            tr_data = IQDataset(tr_labels, decimation=2, window=400, normalized=n)
+            ts_data = IQDataset(ts_labels, decimation=2, window=400, normalized=n)
+            tr_loader = DataLoader(tr_data, batch_size, shuffle=True)
+            ts_loader = DataLoader(ts_data, batch_size, shuffle=True)
+            network = models.Multi_Net(input_len=400)
+            opt = optim.Adam(network.parameters(), lr)
+            loss = train(name, network, opt, tr_loader, epochs)
+            results = test(network, ts_loader)
+            mloss_trial[f"t = {i}"] = loss
+            trial_accuracy += results['accuracy']
+            if (results['accuracy'] < 0.2): default_strat += 1
+        accuracy.append(trial_accuracy / 10)
+        accuracy_labels.append(f"{n}")
+        rpt.add_multi_loss(mloss_trial, alt_name=f"normalization_{n}")
+        print(f"normalization_n defaults = {default_strat}")
+
+    rpt.add_accuracy_graph(accuracy, "normalization", x_labels=accuracy_labels)
     rpt.save()
     if typst: rpt.compile()
 
