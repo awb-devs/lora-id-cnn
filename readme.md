@@ -8,10 +8,11 @@ The project (and repo) is split into two distinct sections:
 - 'model implementation' which provides the code neccessary to train and test the models one data has been collected. 
 
 This document contains a lot of info and is split into four sections detailing instructions for reproduction, background information, and the results:
-    1. Data Collection (how to)
-    2. Model Training & Testing (how to)
-    3. Background Information
-    4. Experiments & Results
+
+1. Data Collection (how to)
+2. Model Training & Testing (how to)
+3. Background Information
+4. Experiments & Results
 
 If you aren't interested in collecting your own data, you can use the data I collected, which is preorganized in the 'dataset' folder. In this case you can skip the section on data collection.
 
@@ -22,9 +23,10 @@ If you aren't interested in running the code yourself, and just want to see the 
 Data for this project was collected using GNU-Radio (and GNU-Radio Companion) [2].
 
 Hardware used was:
-    1. HackRF Portapack Mayhem Edition SDR [3]
-    2. 8 Heltec Automation LoRa32 v3 development boards [4]
-    3. 2 30db Attenuators, and appropriate SMA Cabling & antennas.
+
+1. HackRF Portapack Mayhem Edition SDR [3]
+2. 8 Heltec Automation LoRa32 v3 development boards [4]
+3. 2 30db Attenuators, and appropriate SMA Cabling & antennas.
 
 In order to get started, you will first need to install gnu radio:
 
@@ -116,6 +118,7 @@ In order to address this problem, secondary authentication methods are introduce
 In recent years, there has been a push to attempt to develop an approach using neural networks to classify radio signals. The main advantage of neural networks is that they do not require bespoke implementations, and can do feature extraction without direction. 
 
 In my view, there are three main challenges such an approach must overcome before it's able to be useful in practice.
+
 1. Performance - models must run (and likely train) on low power embedded systems.
 2. Location & Environmental Dependance - Radio devices are often mobile and extremely sensitive to location and environmental changes. Even in one device in one location, the temperature of the crystal oscilator can cause CFO drift overtime, which can impact classification accuracy.
 3. Closed / Open Set - In order to scale to new circumstances and prevent impersonation attacks, models must be able to generalize to new device sets with minimal retraining, and somehow handle novel devices.
